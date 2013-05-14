@@ -7,7 +7,6 @@
 # LANG=C
 
 # main config
-FILENAME=${1}
 DEBUG=0
 
 # WORD config
@@ -18,12 +17,31 @@ PATTERN="[0-9]\{2\}[:][0-9]\{2\}[:][0-9]\{2\}" # Ex. "11:22:33 ...\n"
 RANGE_MIN_MINUTE=20
 RANGE_MAX_MINUTE=25
 
+# check args, set options
+function argCheck()
+{
+while [ "$1" != "" ]
+do
+	case "$1" in
+	"-D" ) DEBUG=1 ;;
+
+	# default
+	* )    FILENAME="${1}"; export FILENAME ;;
+	esac
+
+	shift
+done
+}
 
 # checking...
 #     is file ${FILENAME} exist?
-WORK_FILE="${FILENAME}_grep_date_only"
 function pre_main()
 {
+	WORK_FILE="${FILENAME}_grep_date_only"
+	export WORK_FILE
+
+	debug "FILENAME is ${FILENAME}!"
+
 	if test "" = "${FILENAME}" ; then
 		echo "ERROR: filename is needed."
 		echo ""
@@ -31,7 +49,7 @@ function pre_main()
 		exit 1
 	fi
 
-	if test -e $1 ; then
+	if test -e ${FILENAME} ; then
 		:
 	else
 		echo "ERROR: ${FILENAME} not exist."
@@ -43,11 +61,15 @@ function pre_main()
 }
 
 # delete temporary files.
-TARGET_FILES_TO_CLEAR="${WORK_FILE} ${FILENAME}_grep_GREP_WORD"
 function clear_tmpfiles()
 {
+	TARGET_FILES_TO_CLEAR="${WORK_FILE} ${FILENAME}_grep_GREP_WORD"
+
 	if test 1 -ne ${DEBUG} ; then
 		rm ${TARGET_FILES_TO_CLEAR}
+	else
+		debug ""
+		debug "we did not delete '${TARGET_FILES_TO_CLEAR}' for DEBUG."
 	fi
 } # function clear_tmpfiles()
 
@@ -57,7 +79,8 @@ function clear_tmpfiles()
 #	1 : true
 function inrange()
 {
-I_RET=0
+	I_RET=0
+
 	if test ${RANGE_MIN_MINUTE} -le $1 ; then
 		if test $1 -le ${RANGE_MAX_MINUTE} ; then
 			I_RET=1
@@ -75,12 +98,13 @@ function debug()
 	fi
 } # function debug()
 
-OLD_HOUR=0
-OLD_MIN=0
-INTERVAL=0
 function main()
 {
-I_LOOP=0
+	OLD_HOUR=0
+	OLD_MIN=0
+	INTERVAL=0
+	I_LOOP=0
+
 while read line
 do
 	debug "=================================================="
@@ -90,13 +114,19 @@ do
 		break
 	fi
 
+	# このフォーマットを元に、ログの 時・分を取得
+	# 09:51:44
+	# ':' 区切り
 	NEW_HOUR=`echo ${line} | awk -F: '{print $1}' | sed 's/^0//'`
 	NEW_MIN=`echo ${line} | awk -F: '{print $2}' | sed 's/^0//'`
+	NEW_SEC=`echo ${line} | awk -F: '{print $3}' | sed 's/^0//'`
 
 	debug "NEW_HOUR is ${NEW_HOUR}"
 	debug "NEW_MIN is ${NEW_MIN}"
+	debug "NEW_SEC is ${NEW_SEC}"
 	debug "OLD_HOUR is ${OLD_HOUR}"
 	debug "OLD_MIN is ${OLD_MIN}"
+	debug "OLD_SEC is ${OLD_SEC}"
 
 	HOUR_INTERVAL=`expr ${NEW_HOUR} - ${OLD_HOUR}`
 	debug "HOUR_INTERVAL is ${HOUR_INTERVAL}"
@@ -136,7 +166,9 @@ done < ${WORK_FILE}
 #===================================================
 # main
 #===================================================
-pre_main # check args
+argCheck $* # check args, set options.
+pre_main
 main
 clear_tmpfiles
+
 exit
