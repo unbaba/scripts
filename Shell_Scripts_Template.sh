@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# this template is tested with 　
+# this template is tested with
 # Fedora14
 # kernel 2.6.35.14-106.fc14.i686
 # GNU bash, version 4.1.7(1)-release (i386-redhat-linux-gnu)
@@ -75,6 +75,8 @@ done
 	export DEBUG
 	export DRYRUN
 }
+
+
 
 #============================================================
 #=== for checking template functions
