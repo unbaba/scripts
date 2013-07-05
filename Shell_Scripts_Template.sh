@@ -8,9 +8,9 @@
 
 # get option from console.
 OPTION_INDEX="\
-    -D : ENABLE DEBUG
-
-    -- : Words after '--' is not considered to be options.
+    -D        : ENABLE DEBUG
+    --dry-run : Only show command to execute, but don't execute.
+    --        : Words after '--' is not considered to be options.
 "
 
 # echo arg $1 if $DEBUG is enabled.
@@ -32,13 +32,31 @@ function getOption()
 
 	# Flags for this function.
 	FLAG_NOT_OPTION=""
+	
+	# How to take --dry-run option?
+	#   
+	#   ex.)
+	#   $ vi Shell_Scripts_Template.sh
+	#       ${DRYRUN} ping -c 1 192.168.0.1
+	#
+	#   $ ./Shell_Scripts_Template.sh
+	#   PING 192.168.0.1 (192.168.0.1) 56(84) bytes of data.
+	#   64 bytes from 192.168.0.1: icmp_req=1 ttl=60 time=3.59 ms
+	#   
+	#   --- 192.168.0.1 ping statistics ---
+	#   1 packets transmitted, 1 received, 0% packet loss, time 0ms
+	#   rtt min/avg/max/mdev = 3.598/3.598/3.598/0.000 ms
+	#
+	#   $ ./Shell_Scripts_Template.sh --dry-run
+	#	ping -c 1 192.168.0.1
+	DRYRUN=""
 
 while [ "$1" != "" ]
 do
 	case "${FLAG_NOT_OPTION}${1}" in
 	'-D' ) DEBUG=1 ;;
 	'--' ) FLAG_NOT_OPTION=1 ;;
-
+	'--dry-run' ) DRYRUN="echo " ;;
 	# default
 	* )	FILENAMES="${FILENAMES} ${1}"
 		if [ "" = "${FILENAME}" ] ; then
@@ -55,6 +73,7 @@ done
 	export FILENAME
 	export FILENAMES
 	export DEBUG
+	export DRYRUN
 }
 
 #============================================================
@@ -64,6 +83,7 @@ function check_getOption()
 	debug "DEBUG       is  ${DEBUG}."
 	debug "FILENAME    is  ${FILENAME}."
 	debug "FILENAMES   is  ${FILENAMES}."
+	debug "DRYRUN      is  ${DRYRUN}."
 }
 
 getOption $*
