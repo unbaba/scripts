@@ -13,6 +13,16 @@ OPTION_INDEX="\
     -- : Words after '--' is not considered to be options.
 "
 
+# echo arg $1 if $DEBUG is enabled.
+function debug()
+{
+	if test 1 -eq $DEBUG ; then
+		echo $1
+	fi
+} # function debug()
+
+# call this function as this format.
+#    getOption $*
 function getOption()
 {
 	# Values for Export.
@@ -47,15 +57,13 @@ done
 	export DEBUG
 }
 
-
-
 #============================================================
 #=== for checking template functions
 function check_getOption()
 {
-	echo "DEBUG       is  ${DEBUG}."
-	echo "FILENAME    is  ${FILENAME}."
-	echo "FILENAMES   is  ${FILENAMES}."
+	debug "DEBUG       is  ${DEBUG}."
+	debug "FILENAME    is  ${FILENAME}."
+	debug "FILENAMES   is  ${FILENAMES}."
 }
 
 getOption $*
