@@ -41,4 +41,4 @@ main()
 # create (ARG1 * ARG2) emptyfiles
 #
 # create 1,000,000 files.
-main 1000 1000
+main $1 1000
